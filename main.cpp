@@ -1,54 +1,13 @@
-/*
-    TODO
-    1. menu driven
-    2. schedule job
-    3. add/remove constructors for testing
-    4. show task details on booking
-    5. modify access specifier according to need
-    6. add spacing/decoration during I/O
-    7. add option to view booked task in customer view
-*/
-
-// cin.ignore
-
-/*
-    SIMPLIFY:
-    1. validate phoneno functionality within customer getInfo()
-    2. remove technician view
-    3. only one customer
-    4.
-*/
+// Home Care: Smart Scheduling System for Home Repair and Maintenance
 
 #include <iostream>
-#include <string>
+#include <string> // we include this to access length() property of strings
 using namespace std;
 
-// global variables
+// global variable
 const string daysOfWeek[7] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 
-// function prototyping & definition
-// function to validate phone number
-bool validatePhoneNumber(string phoneNumber)
-{
-    bool isValid = true;
-    if (phoneNumber.length() != 10)
-    {
-        isValid = false;
-        cout << "Phone number must be 10 digits long" << endl;
-    }
-    for (int i = 0; i < phoneNumber.length(); i++)
-    {
-        char ch = phoneNumber[i];
-        if (!(ch >= 48 && ch <= 57))
-        {
-            isValid = false;
-            cout << "Each character must be a digit" << endl;
-        }
-    }
-    return isValid;
-}
-
-// class task
+// defining core classes and their attributes
 class Task
 {
 private:
@@ -59,276 +18,245 @@ private:
 public:
     int taskID;
     static int noOfTasks;
-    Task(string taskName, string taskDescription, double taskAmount)
+    Task(string taskName, string taskDescription, double taskAmount) // implementing constructor and assigning a unique task ID
     {
         noOfTasks++;
         taskID = 100 + noOfTasks;
-        Task::taskName = taskName;
+        Task::taskName = taskName; // use scope resolution operator to access members of class
         Task::taskDescription = taskDescription;
         Task::taskAmount = taskAmount;
     }
-
-    void setTask()
-    {
-        cin.ignore();
-        cout << "Enter task name: ";
-        getline(cin, taskName);
-        cout << "Enter task description: ";
-        getline(cin, taskDescription);
-        cout << "Enter task amount: ";
-        cin >> taskAmount;
-    }
     void displayInfo()
     {
-        cout << "Here are task details: " << endl
-             << "ID: " << taskID << endl
-             << "Name: " << taskName << endl
-             << "Description: " << taskDescription << endl
+        cout << "-----------------------" << endl
+             << "Here are task details: " << endl
+             << "Task ID: " << taskID << endl
+             << "Task Name: " << taskName << endl
+             << "Task Description: " << taskDescription << endl
              << "Amount: " << taskAmount << endl;
     }
 };
 
-// class technician
 class Technician
 {
 private:
     string technicianName;
     string technicianPhoneNumber;
+    bool workingDays[7];
 
 public:
     int technicianID;
-    bool workingDays[7];
     static int noOfTechnicians;
-    Technician(string technicianName, string technicianPhoneNumber)
+    Technician(string technicianName, string technicianPhoneNumber) // implementing constructor and assigning a unique technician ID
     {
         noOfTechnicians++;
         technicianID = 1000 + noOfTechnicians;
         Technician::technicianName = technicianName;
         Technician::technicianPhoneNumber = technicianPhoneNumber;
     }
-
-    // void setInfo()
-    // {
-    //     cout << "Enter your name: ";
-    //     getline(cin, technicianName);
-    //     // validating phone number input
-    //     do
-    //     {
-    //         cout << "Enter your phone number: ";
-    //         cin >> technicianPhoneNumber;
-
-    //     } while (!validatePhoneNumber(technicianPhoneNumber));
-    // }
-    // void updateWorkingDays()
-    // {
-    //     int input;
-
-    //     cout << "-----------------------" << endl;
-    //     cout << "Hello " << technicianName << endl
-    //          << "Which days do you prefer to work on?" << endl;
-
-    //     for (int i = 0; i < 7; i++)
-    //     {
-    //         do
-    //         {
-    //             cout << "Do you work on " << daysOfWeek[i] << "[1 = yes, 2 = no]: ";
-    //             cin >> input;
-    //             if (input == 1)
-    //             {
-    //                 workingDays[i] = true;
-    //             }
-    //             else if (input == 2)
-    //             {
-    //                 workingDays[i] = false;
-    //             }
-    //             else
-    //             {
-    //                 cout << "Wrong input" << endl;
-    //             }
-    //         } while (input != 1 && input != 2);
-    //     }
-    // }
     void displayInfo()
     {
-        cout << "Here are technician details: " << endl
-             << "ID: " << technicianID << endl
-             << "Name: " << technicianName << endl
-             << "Phone number: " << technicianPhoneNumber << endl;
+        cout << "-----------------------" << endl
+             << "Here are technician details: " << endl
+             << "Technician ID: " << technicianID << endl
+             << "Technician Name: " << technicianName << endl
+             << "Technician Phone number: " << technicianPhoneNumber << endl;
+    }
+    void setWorkingDays(bool days[]) // sets the working days of technician based on given boolean array
+    {
+        for (int i = 0; i < 7; i++)
+        {
+            workingDays[i] = days[i];
+        }
+    }
+    bool isAvailableOn(int day) // returns true if technician is available on given day else false
+    {
+        return workingDays[day];
     }
 };
 
-// class customer
 class Customer
 {
 private:
+    int customerID;
     string customerName;
-    string homeAddress;
+    string customerAddress;
     string customerPhoneNumber;
 
 public:
-    int customerID;
     int bookedTaskID;
     int bookedDay;
     int bookedTechnicianID;
     static int noOfCustomers;
-    Customer()
+    Customer() // implementing constructor and assigning a unique customer ID
     {
         noOfCustomers++;
         customerID = 10000 + noOfCustomers;
     }
-
-    // // for testing
-    // Customer(string name, string address, string phoneno)
-    // {
-    //     noOfCustomers++;
-    //     customerID = 10000 + noOfCustomers;
-    //     customerName = name;
-    //     customerPhoneNumber = phoneno;
-    //     homeAddress = address;
-    // }
-
     void setInfo()
     {
         cin.ignore();
         cout << "Enter your name: ";
         getline(cin, customerName);
         cout << "Enter your home address: ";
-        getline(cin, homeAddress);
+        getline(cin, customerAddress);
 
         // validating phone number input
+        bool isValid;
         do
         {
             cout << "Enter your phone number: ";
             cin >> customerPhoneNumber;
+            isValid = true;
 
-        } while (!validatePhoneNumber(customerPhoneNumber));
+            // checking for 10 character
+            if (customerPhoneNumber.length() != 10)
+            {
+                isValid = false;
+            }
+
+            // checking that each character is a digit
+            for (int i = 0; i < customerPhoneNumber.length(); i++)
+            {
+                char ch = customerPhoneNumber[i];
+                if (!(ch >= 48 && ch <= 57)) // comparing agains ASCII values of 0-9
+                {
+                    isValid = false;
+                    break;
+                }
+            }
+            if (!isValid)
+            {
+                cout << "Phone number must be 10 digits long" << endl; // displaying error message
+            }
+        } while (!isValid);
     }
     void displayInfo()
     {
-        cout << "Here are customer details: " << endl
-             << "ID: " << customerID << endl
-             << "Name: " << customerName << endl
-             << "Home address: " << homeAddress << endl
-             << "Phone number: " << customerPhoneNumber << endl;
+        cout << "-----------------------" << endl
+             << "Here are customer details: " << endl
+             << "Customer ID: " << customerID << endl
+             << "Customer Name: " << customerName << endl
+             << "Customer Address: " << customerAddress << endl
+             << "Customer Phone number: " << customerPhoneNumber << endl;
     }
-    void bookDay(Technician techncians[])
-    {
-        int userDayInput;
-        bool technicianAvailable = false;
 
-        do
+    void bookTask(Task tasks[]) // allows customer to choose a task from available options
+    {
+        bool taskFound = false;
+
+        // displaying all tasks to customer
+        for (int i = 0; i < Task::noOfTasks; i++)
         {
-            // asking for day of task
-            do
+            tasks[i].displayInfo();
+        }
+        do // this loop executes until user enters correct taskID
+        {
+            // asking customer to choose task
+            cout << "-----------------------" << endl
+                 << "Which task do you want?" << endl
+                 << "Enter task ID: ";
+            cin >> bookedTaskID;
+
+            // checking if entered bookedTaskID matches any taskID
+            for (int i = 0; i < Task::noOfTasks; i++)
+            {
+                if (tasks[i].taskID == bookedTaskID)
+                {
+                    taskFound = true;
+                }
+            }
+            if (!taskFound)
+            {
+                cout << "Task not found. Enter correct task ID" << endl; // displaying error message
+            }
+        } while (!taskFound);
+    }
+
+    void bookDay(Technician techncians[]) // allows customer to book a task on an available day with a technician
+    {
+        bool technicianAvailable = false;
+        do // outer loop executes till technician is not available on booked day
+        {
+            do // inner loop executes until user enters correct day of week
             {
                 cout << endl
                      << "-----------------------" << endl;
                 cout << "Which day do you want to book?" << endl;
 
-                // displaying days
+                // displaying days of week and getting input
                 for (int i = 0; i < 7; i++)
                 {
                     cout << i << ". " << daysOfWeek[i] << endl;
                 }
+                cin >> bookedDay;
 
-                // getting input
-                cin >> userDayInput;
-
-                // validating input
-                if (!(userDayInput >= 0 && userDayInput <= 6))
+                if (!(bookedDay >= 0 && bookedDay <= 6))
                 {
                     cout << "Invalid input. Enter a number between 0 and 6" << endl;
                 }
-            } while (!(userDayInput >= 0 && userDayInput <= 6));
+            } while (!(bookedDay >= 0 && bookedDay <= 6));
 
-            bookedDay = userDayInput;
-
-            // checking for available technician
+            // checking if any technician works on booked day
             for (int i = 0; i < Technician::noOfTechnicians; i++)
             {
-                if (techncians[i].workingDays[userDayInput])
+                if (techncians[i].isAvailableOn(bookedDay))
                 {
                     technicianAvailable = true;
                     bookedTechnicianID = techncians[i].technicianID;
-                    cout << "Technician available. " << daysOfWeek[userDayInput] << " booked" << endl;
+                    cout << "Technician available. " << daysOfWeek[bookedDay] << " booked" << endl;
                     break;
                 }
             }
-
-            // if technician not available on that day
             if (!technicianAvailable)
             {
-                cout << "Sorry no technician available on " << daysOfWeek[userDayInput] << endl
-                     << "Please try again" << endl;
+                cout << "Sorry no technician available on " << daysOfWeek[bookedDay] << endl
+                     << "Please try again" << endl; // displaying error message
             }
         } while (!technicianAvailable);
     }
 
-    void bookTask(Task tasks[])
+    void displayBookingDetails(Task tasks[], Technician technicians[]) // displays details of booked task and assigned technician
     {
-        int userTaskInput;
-        bool taskFound = false;
-
-        cout << endl
-             << "-----------------------" << endl;
-        do
+        // displaying booked task details
+        bool taskFound;
+        for (int i = 0; i < Task::noOfTasks; i++)
         {
-            // displaying all tasks to customer
-            for (int i = 0; i < Task::noOfTasks; i++)
+            taskFound = false;
+            if (tasks[i].taskID == bookedTaskID)
             {
+                taskFound = true;
                 tasks[i].displayInfo();
-                cout << "-----------------------" << endl;
+                break;
             }
+        }
+        if (!taskFound)
+        {
+            cout << "Task details not found" << endl;
+        }
 
-            // asking customer to choose task
-            cout << "Which task do you want?" << endl
-                 << "Enter task ID: ";
-            cin >> userTaskInput;
-
-            // checking for entered task
-            for (int i = 0; i < Task::noOfTasks; i++)
+        // displaying assigned technician details and booked day
+        bool technicianFound;
+        for (int i = 0; i < Technician::noOfTechnicians; i++)
+        {
+            technicianFound = false;
+            if (technicians[i].technicianID == bookedTechnicianID)
             {
-                if (tasks[i].taskID == userTaskInput)
-                {
-                    taskFound = true;
-                    bookedTaskID = tasks[i].taskID;
-                }
+                technicianFound = true;
+                technicians[i].displayInfo();
+                cout << "Day booked: " << daysOfWeek[bookedDay] << endl;
+                break;
             }
-            if (!taskFound)
-            {
-                cout << "Task not found" << endl;
-            }
-        } while (!taskFound);
+        }
+        if (!technicianFound)
+        {
+            cout << "Technician details not found" << endl;
+        }
     }
 };
 
-// class job
-// class Job
-// {
-// private:
-//     int jobID;
-//     string jobStatus;
-//     // Customer customer;
-//     // Technician technician;
-//     // Task task;
-// public:
-//     static int noOfJobs;
-//     Job()
-//     {
-//         noOfJobs++;
-//         jobID = 1100 + noOfJobs;
-//     }
-// };
-
-// class manager
-// class Manager
-// {
-// private:
-// public:
-// };
-
-// initialising static members
-// int Customer::noOfCustomers = 0;
+// initialising static data members of class
+int Customer::noOfCustomers = 0;
 int Technician::noOfTechnicians = 0;
 int Task::noOfTasks = 0;
 
@@ -343,31 +271,23 @@ int main()
     Task t2("Electrical Wiring", "Repair and installation of electrical wiring", 3000.00);
     Task t3("Carpentry", "Furniture repair and woodwork", 2500.00);
     Task t4("Painting", "Wall painting and touch-ups", 5000.00);
-    Task t5("Roof Repair", "Fixing roof leaks and damages", 7000.00);
-    Task t6("Flooring", "Tile and marble installation and repair", 8000.00);
-    Task t7("Pest Control", "Termite and insect treatment", 3500.00);
-    Task t8("Appliance Repair", "Fixing home appliances like refrigerators and washing machines", 4000.00);
+    Task t5("Flooring", "Tile and marble installation and repair", 8000.00);
 
-    Task tasks[] = {t1, t2, t3, t4, t5, t6, t7, t8};
+    // creating an array of Task objects
+    Task tasks[] = {t1, t2, t3, t4, t5};
 
     // predefined technicians
     Technician tech1("Amit Kumar", "9876543210");
     Technician tech2("Ravi Sharma", "9123456789");
 
-    // assigning working days for tech1
+    // assigning working days for each technician
     bool tech1Days[] = {true, true, true, true, false, false, false}; // Works Monday-Thursday
-    for (int i = 0; i < 7; i++)
-    {
-        tech1.workingDays[i] = tech1Days[i];
-    }
+    tech1.setWorkingDays(tech1Days);
 
-    // assigning working days for tech2
     bool tech2Days[] = {false, true, true, true, true, true, false}; // Works Tuesday-Saturday
-    for (int i = 0; i < 7; i++)
-    {
-        tech2.workingDays[i] = tech2Days[i];
-    }
+    tech2.setWorkingDays(tech2Days);
 
+    // creating an array of Technician objects
     Technician technicians[] = {tech1, tech2};
 
     // menu-driven system for user interaction
@@ -375,9 +295,9 @@ int main()
     {
         cout << endl
              << "-----------------------" << endl
-             << "*** Welcome to HomeCare Scheduling System ***" << endl
-             << "Welcome. How can we help you?" << endl
-             << "Choices:\n1. Set Details\n2. View Details\n3. Book Task\n4. Book day of task\n5. Exit" << endl;
+             << "*** Welcome to Home Care Scheduler ***" << endl
+             << "How can we help you?" << endl
+             << "Choices:\n1. Set Customer Details\n2. View Customer Details\n3. Book Task\n4. Book day of task\n5. View booking details\n6. Exit" << endl;
         cin >> choice;
 
         switch (choice)
@@ -385,30 +305,28 @@ int main()
         case 1:
             customer.setInfo();
             break;
-
         case 2:
             customer.displayInfo();
             break;
-
         case 3:
             customer.bookTask(tasks);
             break;
-
         case 4:
             customer.bookDay(technicians);
             break;
-
         case 5:
-            cout << "Thank you for using HomeCare Scheduling System" << endl
+            customer.displayBookingDetails(tasks, technicians);
+            break;
+        case 6:
+            cout << "Thank you for using Home Care Scheduler" << endl
                  << "Exiting program" << endl
                  << "-----------------------" << endl;
             break;
-
         default:
-            cout << "Invalid input. Enter a number between 1 to 5" << endl;
+            cout << "Invalid input. Enter a number between 1 to 6" << endl;
             break;
         }
-    } while (choice != 5);
+    } while (choice != 6);
 
     return 0;
 }
