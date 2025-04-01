@@ -82,11 +82,11 @@ private:
     string customerName;
     string customerAddress;
     string customerPhoneNumber;
-
-public:
     int bookedTaskID;
     int bookedDay;
     int bookedTechnicianID;
+
+public:
     static int noOfCustomers;
     Customer() // implementing constructor and assigning a unique customer ID
     {
@@ -95,7 +95,7 @@ public:
     }
     void setInfo()
     {
-        cin.ignore();
+        cin.ignore(); // used to clear input buffer
         cout << "Enter your name: ";
         getline(cin, customerName);
         cout << "Enter your home address: ";
@@ -119,7 +119,7 @@ public:
             for (int i = 0; i < customerPhoneNumber.length(); i++)
             {
                 char ch = customerPhoneNumber[i];
-                if (!(ch >= 48 && ch <= 57)) // comparing agains ASCII values of 0-9
+                if (!(ch >= 48 && ch <= 57)) // comparing against ASCII values of 0-9
                 {
                     isValid = false;
                     break;
