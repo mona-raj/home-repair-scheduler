@@ -18,14 +18,16 @@ private:
 public:
     int taskID;
     static int noOfTasks;
-    Task(string taskName, string taskDescription, double taskAmount) // implementing constructor and assigning a unique task ID
+
+    Task(string name, string description, double amount) // implementing constructor and assigning a unique task ID
     {
         noOfTasks++;
         taskID = 100 + noOfTasks;
-        Task::taskName = taskName; // use scope resolution operator to access members of class
-        Task::taskDescription = taskDescription;
-        Task::taskAmount = taskAmount;
+        taskName = name; // use scope resolution operator to access members of class
+        taskDescription = description;
+        taskAmount = amount;
     }
+
     void displayInfo()
     {
         cout << "-----------------------" << endl
@@ -37,31 +39,37 @@ public:
     }
 };
 
-class Technician
+class User
+{
+protected:
+    string name;
+    string phoneNumber;
+
+public:
+    void displayInfo()
+    {
+        cout << "Name: " << name << endl
+             << "Phone number: " << phoneNumber << endl;
+    }
+};
+
+class Technician : public User
 {
 private:
-    string technicianName;
-    string technicianPhoneNumber;
     bool workingDays[7];
 
 public:
     int technicianID;
     static int noOfTechnicians;
+
     Technician(string technicianName, string technicianPhoneNumber) // implementing constructor and assigning a unique technician ID
     {
         noOfTechnicians++;
         technicianID = 1000 + noOfTechnicians;
-        Technician::technicianName = technicianName;
-        Technician::technicianPhoneNumber = technicianPhoneNumber;
+        name = technicianName;
+        phoneNumber = technicianPhoneNumber;
     }
-    void displayInfo()
-    {
-        cout << "-----------------------" << endl
-             << "Here are technician details: " << endl
-             << "Technician ID: " << technicianID << endl
-             << "Technician Name: " << technicianName << endl
-             << "Technician Phone number: " << technicianPhoneNumber << endl;
-    }
+
     void setWorkingDays(bool days[]) // sets the working days of technician based on given boolean array
     {
         for (int i = 0; i < 7; i++)
@@ -69,19 +77,18 @@ public:
             workingDays[i] = days[i];
         }
     }
+
     bool isAvailableOn(int day) // returns true if technician is available on given day else false
     {
         return workingDays[day];
     }
 };
 
-class Customer
+class Customer : public User
 {
 private:
     int customerID;
-    string customerName;
-    string customerAddress;
-    string customerPhoneNumber;
+    string address;
     int bookedTaskID;
     int bookedDay;
     int bookedTechnicianID;
@@ -93,32 +100,33 @@ public:
         noOfCustomers++;
         customerID = 10000 + noOfCustomers;
     }
+
     void setInfo()
     {
         cin.ignore(); // used to clear input buffer
         cout << "Enter your name: ";
-        getline(cin, customerName);
+        getline(cin, name);
         cout << "Enter your home address: ";
-        getline(cin, customerAddress);
+        getline(cin, address);
 
         // validating phone number input
         bool isValid;
         do
         {
             cout << "Enter your phone number: ";
-            cin >> customerPhoneNumber;
+            cin >> phoneNumber;
             isValid = true;
 
             // checking for 10 character
-            if (customerPhoneNumber.length() != 10)
+            if (phoneNumber.length() != 10)
             {
                 isValid = false;
             }
 
             // checking that each character is a digit
-            for (int i = 0; i < customerPhoneNumber.length(); i++)
+            for (int i = 0; i < phoneNumber.length(); i++)
             {
-                char ch = customerPhoneNumber[i];
+                char ch = phoneNumber[i];
                 if (!(ch >= 48 && ch <= 57)) // comparing against ASCII values of 0-9
                 {
                     isValid = false;
@@ -131,14 +139,11 @@ public:
             }
         } while (!isValid);
     }
-    void displayInfo()
+
+    void displayCustomerInfo()
     {
-        cout << "-----------------------" << endl
-             << "Here are customer details: " << endl
-             << "Customer ID: " << customerID << endl
-             << "Customer Name: " << customerName << endl
-             << "Customer Address: " << customerAddress << endl
-             << "Customer Phone number: " << customerPhoneNumber << endl;
+        displayInfo();
+        cout << "Address: " << address << endl;
     }
 
     void bookTask(Task tasks[]) // allows customer to choose a task from available options
@@ -243,6 +248,8 @@ public:
             if (technicians[i].technicianID == bookedTechnicianID)
             {
                 technicianFound = true;
+                cout << "-----------------------" << endl
+                     << "Here are technician details:" << endl;
                 technicians[i].displayInfo();
                 cout << "Day booked: " << daysOfWeek[bookedDay] << endl;
                 break;
@@ -306,7 +313,7 @@ int main()
             customer.setInfo();
             break;
         case 2:
-            customer.displayInfo();
+            customer.displayCustomerInfo();
             break;
         case 3:
             customer.bookTask(tasks);
