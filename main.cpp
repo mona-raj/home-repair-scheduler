@@ -13,9 +13,9 @@ class Task
 private:
     string taskName;
     string taskDescription;
-    double taskAmount;
 
 public:
+    double taskAmount;
     int taskID;
     static int noOfTasks;
 
@@ -86,14 +86,15 @@ public:
 
 class Customer : public User
 {
-private:
+protected:
     int customerID;
     string address;
-    int bookedTaskID;
-    int bookedDay;
     int bookedTechnicianID;
 
 public:
+    int bookedTaskID;
+    int bookedDay;
+
     static int noOfCustomers;
     Customer() // implementing constructor and assigning a unique customer ID
     {
@@ -106,7 +107,7 @@ public:
         cin.ignore(); // used to clear input buffer
         cout << "Enter your name: ";
         getline(cin, name);
-        cout << "Enter your home address: ";
+        cout << "Enter your address: ";
         getline(cin, address);
 
         // validating phone number input
@@ -262,6 +263,42 @@ public:
     }
 };
 
+class PremiumCustomer : public Customer
+{
+private:
+    double discountedAmount;
+
+public:
+    int countOfBookings;
+    int *bookedDaysList;
+
+    PremiumCustomer(int count = 3) // dynamic constructor with default argument
+    {
+        noOfCustomers++;
+        customerID = 10000 + noOfCustomers;
+        countOfBookings = count;
+        bookedDaysList = new int[countOfBookings];
+    }
+
+    void premiumDiscount(Task tasks[], int id)
+    {
+        for (int i = 0; i < Task::noOfTasks; i++)
+        {
+            if (tasks[i].taskID == id)
+            {
+                discountedAmount = tasks[i].taskAmount * 90 / 100;
+            }
+        }
+        cout << "-----------------------" << endl
+             << "Premium benefit amount: " << discountedAmount << endl;
+    }
+
+    ~PremiumCustomer() // destructor
+    {
+        delete[] bookedDaysList;
+    }
+};
+
 // initialising static data members of class
 int Customer::noOfCustomers = 0;
 int Technician::noOfTechnicians = 0;
@@ -270,8 +307,7 @@ int Task::noOfTasks = 0;
 // main function
 int main()
 {
-    int choice;
-    Customer customer;
+    int firstChoice, secondChoice;
 
     // predefined tasks
     Task t1("Plumbing", "Fixing leaking pipes and taps", 1500.00);
@@ -296,6 +332,9 @@ int main()
 
     // creating an array of Technician objects
     Technician technicians[] = {tech1, tech2};
+    
+    Customer customer;
+    PremiumCustomer premium(2);
 
     // menu-driven system for user interaction
     do
@@ -303,37 +342,110 @@ int main()
         cout << endl
              << "-----------------------" << endl
              << "*** Welcome to Home Care Scheduler ***" << endl
-             << "How can we help you?" << endl
-             << "Choices:\n1. Set Customer Details\n2. View Customer Details\n3. Book Task\n4. Book day of task\n5. View booking details\n6. Exit" << endl;
-        cin >> choice;
+             << "Identify yourself" << endl
+             << "Choices:\n1. Regular Customer\n2. Premium Customer\n3. Exit" << endl;
+        cin >> firstChoice;
 
-        switch (choice)
+        switch (firstChoice)
         {
         case 1:
-            customer.setInfo();
+            // regular customer view
+            do
+            {
+                cout << endl
+                     << "-----------------------" << endl
+                     << "*** Welcome to Home Care Scheduler ***" << endl
+                     << "How can we help you?" << endl
+                     << "Choices:\n1. Set Customer Details\n2. View Customer Details\n3. Book Task\n4. Book day of task\n5. View booking details\n6. Exit" << endl;
+                cin >> secondChoice;
+
+                switch (secondChoice)
+                {
+                case 1:
+                    customer.setInfo();
+                    break;
+                case 2:
+                    customer.displayCustomerInfo();
+                    break;
+                case 3:
+                    customer.bookTask(tasks);
+                    break;
+                case 4:
+                    customer.bookDay(technicians);
+                    break;
+                case 5:
+                    customer.displayBookingDetails(tasks, technicians);
+                    break;
+                case 6:
+                    cout << "Thank you for using Home Care Scheduler" << endl
+                         << "Exiting" << endl
+                         << "-----------------------" << endl;
+                    break;
+                default:
+                    cout << "Invalid input. Enter a number between 1 to 6" << endl;
+                    break;
+                }
+            } while (secondChoice != 6);
             break;
+
         case 2:
-            customer.displayCustomerInfo();
+            // premium customer view
+            do
+            {
+                cout << endl
+                     << "-----------------------" << endl
+                     << "*** Welcome to Home Care Scheduler ***" << endl
+                     << "How can we help you?" << endl
+                     << "Choices:\n1. Set Customer Details\n2. View Customer Details\n3. Book Task\n4. Exit" << endl;
+                cin >> secondChoice;
+
+                switch (secondChoice)
+                {
+                case 1:
+                    customer.setInfo();
+                    break;
+                case 2:
+                    customer.displayCustomerInfo();
+                    break;
+                case 3:
+                    for (int i = 0; i < premium.countOfBookings; i++)
+                    {
+                        premium.bookTask(tasks);
+                        premium.bookDay(technicians);
+                        premium.bookedDaysList[i] = premium.bookedDay;
+                        premium.displayBookingDetails(tasks, technicians);
+                        premium.premiumDiscount(tasks, premium.bookedTaskID);
+                    }
+                    cout << "Booked days: " << endl;
+                    for (int i = 0; i < premium.countOfBookings; i++)
+                    {
+                        cout << daysOfWeek[premium.bookedDaysList[i]] << endl;
+                    }
+                    break;
+                case 4:
+                    cout << "Thank you for using Home Care Scheduler" << endl
+                         << "Exiting" << endl
+                         << "-----------------------" << endl;
+                    break;
+                default:
+                    cout << "Invalid input. Enter a number between 1 to 4" << endl;
+                    break;
+                }
+            } while (secondChoice != 4);
             break;
+
         case 3:
-            customer.bookTask(tasks);
-            break;
-        case 4:
-            customer.bookDay(technicians);
-            break;
-        case 5:
-            customer.displayBookingDetails(tasks, technicians);
-            break;
-        case 6:
             cout << "Thank you for using Home Care Scheduler" << endl
                  << "Exiting program" << endl
                  << "-----------------------" << endl;
             break;
+
         default:
-            cout << "Invalid input. Enter a number between 1 to 6" << endl;
+            cout << "Invalid input. Enter a number between 1 to 3" << endl;
+
             break;
         }
-    } while (choice != 6);
+    } while (firstChoice != 3);
 
     return 0;
 }
