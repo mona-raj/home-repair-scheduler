@@ -1,11 +1,13 @@
 // Home Care: Smart Scheduling System for Home Repair and Maintenance
 
 #include <iostream>
-#include <string> // we include this to access length() property of strings
+#include <fstream> // we include this to read and write file
+#include <string>  // we include this to access length() property of strings
 using namespace std;
 
-// global variable
+// global variables
 const string daysOfWeek[7] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+const string filePath = "file.txt";
 
 // defining core classes and their attributes
 class Task
@@ -23,7 +25,7 @@ public:
     {
         noOfTasks++;
         taskID = 100 + noOfTasks;
-        taskName = name; // use scope resolution operator to access members of class
+        taskName = name;
         taskDescription = description;
         taskAmount = amount;
     }
@@ -89,18 +91,11 @@ class Customer : public User
 protected:
     int customerID;
     string address;
-    int bookedTechnicianID;
 
 public:
+    int bookedTechnicianID;
     int bookedTaskID;
     int bookedDay;
-
-    static int noOfCustomers;
-    Customer() // implementing constructor and assigning a unique customer ID
-    {
-        noOfCustomers++;
-        customerID = 10000 + noOfCustomers;
-    }
 
     void setInfo()
     {
@@ -117,18 +112,14 @@ public:
             cout << "Enter your phone number: ";
             cin >> phoneNumber;
             isValid = true;
-
-            // checking for 10 character
-            if (phoneNumber.length() != 10)
+            if (phoneNumber.length() != 10) // checking for 10 characters
             {
                 isValid = false;
-            }
-
-            // checking that each character is a digit
+            }            
             for (int i = 0; i < phoneNumber.length(); i++)
             {
                 char ch = phoneNumber[i];
-                if (!(ch >= 48 && ch <= 57)) // comparing against ASCII values of 0-9
+                if (!(ch >= 48 && ch <= 57)) // checking that each character is a digit
                 {
                     isValid = false;
                     break;
@@ -158,13 +149,12 @@ public:
         }
         do // this loop executes until user enters correct taskID
         {
-            // asking customer to choose task
             cout << "-----------------------" << endl
                  << "Which task do you want?" << endl
                  << "Enter task ID: ";
             cin >> bookedTaskID;
 
-            // checking if entered bookedTaskID matches any taskID
+            // checking if bookedTaskID matches any taskID
             for (int i = 0; i < Task::noOfTasks; i++)
             {
                 if (tasks[i].taskID == bookedTaskID)
@@ -189,14 +179,11 @@ public:
                 cout << endl
                      << "-----------------------" << endl;
                 cout << "Which day do you want to book?" << endl;
-
-                // displaying days of week and getting input
                 for (int i = 0; i < 7; i++)
                 {
-                    cout << i << ". " << daysOfWeek[i] << endl;
+                    cout << i << ". " << daysOfWeek[i] << endl; // displaying days of week
                 }
                 cin >> bookedDay;
-
                 if (!(bookedDay >= 0 && bookedDay <= 6))
                 {
                     cout << "Invalid input. Enter a number between 0 and 6" << endl;
@@ -240,7 +227,6 @@ public:
         {
             cout << "Task details not found" << endl;
         }
-
         // displaying assigned technician details and booked day
         bool technicianFound;
         for (int i = 0; i < Technician::noOfTechnicians; i++)
@@ -261,6 +247,8 @@ public:
             cout << "Technician details not found" << endl;
         }
     }
+
+    friend void writeFile(string filePath, Customer customer);
 };
 
 class PremiumCustomer : public Customer
@@ -270,13 +258,15 @@ private:
 
 public:
     int countOfBookings;
+    int *bookedTechnicianIDList;
+    int *bookedTaskIDList;
     int *bookedDaysList;
 
     PremiumCustomer(int count = 3) // dynamic constructor with default argument
     {
-        noOfCustomers++;
-        customerID = 10000 + noOfCustomers;
         countOfBookings = count;
+        bookedTechnicianIDList = new int[countOfBookings];
+        bookedTaskIDList = new int[countOfBookings];
         bookedDaysList = new int[countOfBookings];
     }
 
@@ -286,7 +276,7 @@ public:
         {
             if (tasks[i].taskID == id)
             {
-                discountedAmount = tasks[i].taskAmount * 90 / 100;
+                discountedAmount = tasks[i].taskAmount * 0.9;
             }
         }
         cout << "-----------------------" << endl
@@ -295,44 +285,96 @@ public:
 
     ~PremiumCustomer() // destructor
     {
+        delete[] bookedTechnicianIDList;
+        delete[] bookedTaskIDList;
         delete[] bookedDaysList;
     }
+
+    friend void writeFile(string filePath, PremiumCustomer premium);
 };
 
 // initialising static data members of class
-int Customer::noOfCustomers = 0;
 int Technician::noOfTechnicians = 0;
 int Task::noOfTasks = 0;
+
+// functions to write data in file
+void writeFile(string filePath, Customer customer)
+{
+    ofstream writer(filePath);
+    if (!writer)
+    {
+        cout << "File not found" << endl;
+    }
+    writer << "**Customer Details**" << endl
+           << "Name: " << customer.name << endl
+           << "Phone number: " << customer.phoneNumber << endl
+           << "Address: " << customer.address << endl
+           << "**Booking Details**" << endl
+           << "Technician ID: " << customer.bookedTechnicianID << endl
+           << "Task ID: " << customer.bookedTaskID << endl
+           << "Booked day: " << daysOfWeek[customer.bookedDay] << endl;
+    writer.close();
+}
+
+void writeFile(string filePath, PremiumCustomer premium) // function overloading with different data type
+{
+    ofstream writer(filePath);
+    if (!writer)
+    {
+        cout << "File not found" << endl;
+    }
+    writer << "**Customer Details**" << endl
+           << "Name: " << premium.name << endl
+           << "Phone number: " << premium.phoneNumber << endl
+           << "Address: " << premium.address << endl
+           << "**Booking Details**" << endl;
+    for (int i = 0; i < premium.countOfBookings; i++)
+    {
+        writer << "Booking " << (i + 1) << endl
+               << "Technician ID: " << premium.bookedTechnicianIDList[i] << endl
+               << "Task ID: " << premium.bookedTaskIDList[i] << endl
+               << "Booked day: " << daysOfWeek[premium.bookedDaysList[i]] << endl;
+    }
+    writer.close();
+}
+
+// function to read data stored in file
+void readFile(string filePath)
+{
+    ifstream reader(filePath);
+    if (!reader)
+    {
+        cout << "File not found" << endl;
+    }
+    string line;
+    while (!reader.eof())
+    {
+        getline(reader, line);
+        cout << line << endl;
+    }
+    reader.close();
+}
 
 // main function
 int main()
 {
     int firstChoice, secondChoice;
 
-    // predefined tasks
     Task t1("Plumbing", "Fixing leaking pipes and taps", 1500.00);
     Task t2("Electrical Wiring", "Repair and installation of electrical wiring", 3000.00);
     Task t3("Carpentry", "Furniture repair and woodwork", 2500.00);
     Task t4("Painting", "Wall painting and touch-ups", 5000.00);
     Task t5("Flooring", "Tile and marble installation and repair", 8000.00);
+    Task tasks[] = {t1, t2, t3, t4, t5}; // creating an array of Task objects
 
-    // creating an array of Task objects
-    Task tasks[] = {t1, t2, t3, t4, t5};
-
-    // predefined technicians
     Technician tech1("Amit Kumar", "9876543210");
     Technician tech2("Ravi Sharma", "9123456789");
-
-    // assigning working days for each technician
     bool tech1Days[] = {true, true, true, true, false, false, false}; // Works Monday-Thursday
     tech1.setWorkingDays(tech1Days);
-
     bool tech2Days[] = {false, true, true, true, true, true, false}; // Works Tuesday-Saturday
     tech2.setWorkingDays(tech2Days);
+    Technician technicians[] = {tech1, tech2}; // creating an array of Technician objects
 
-    // creating an array of Technician objects
-    Technician technicians[] = {tech1, tech2};
-    
     Customer customer;
     PremiumCustomer premium(2);
 
@@ -343,7 +385,7 @@ int main()
              << "-----------------------" << endl
              << "*** Welcome to Home Care Scheduler ***" << endl
              << "Identify yourself" << endl
-             << "Choices:\n1. Regular Customer\n2. Premium Customer\n3. Exit" << endl;
+             << "Choices:\n1. Regular Customer\n2. Premium Customer\n3. Admin\n4. Exit" << endl;
         cin >> firstChoice;
 
         switch (firstChoice)
@@ -354,11 +396,9 @@ int main()
             {
                 cout << endl
                      << "-----------------------" << endl
-                     << "*** Welcome to Home Care Scheduler ***" << endl
                      << "How can we help you?" << endl
                      << "Choices:\n1. Set Customer Details\n2. View Customer Details\n3. Book Task\n4. Book day of task\n5. View booking details\n6. Exit" << endl;
                 cin >> secondChoice;
-
                 switch (secondChoice)
                 {
                 case 1:
@@ -377,8 +417,8 @@ int main()
                     customer.displayBookingDetails(tasks, technicians);
                     break;
                 case 6:
-                    cout << "Thank you for using Home Care Scheduler" << endl
-                         << "Exiting" << endl
+                    writeFile(filePath, customer); // storing data in file before exiting
+                    cout << "Exiting" << endl
                          << "-----------------------" << endl;
                     break;
                 default:
@@ -394,37 +434,31 @@ int main()
             {
                 cout << endl
                      << "-----------------------" << endl
-                     << "*** Welcome to Home Care Scheduler ***" << endl
                      << "How can we help you?" << endl
                      << "Choices:\n1. Set Customer Details\n2. View Customer Details\n3. Book Task\n4. Exit" << endl;
                 cin >> secondChoice;
-
                 switch (secondChoice)
                 {
                 case 1:
-                    customer.setInfo();
+                    premium.setInfo();
                     break;
                 case 2:
-                    customer.displayCustomerInfo();
+                    premium.displayCustomerInfo();
                     break;
                 case 3:
                     for (int i = 0; i < premium.countOfBookings; i++)
                     {
-                        premium.bookTask(tasks);
                         premium.bookDay(technicians);
-                        premium.bookedDaysList[i] = premium.bookedDay;
-                        premium.displayBookingDetails(tasks, technicians);
+                        premium.bookTask(tasks);
                         premium.premiumDiscount(tasks, premium.bookedTaskID);
-                    }
-                    cout << "Booked days: " << endl;
-                    for (int i = 0; i < premium.countOfBookings; i++)
-                    {
-                        cout << daysOfWeek[premium.bookedDaysList[i]] << endl;
+                        premium.bookedTechnicianIDList[i] = premium.bookedTechnicianID;
+                        premium.bookedTaskIDList[i] = premium.bookedTaskID;
+                        premium.bookedDaysList[i] = premium.bookedDay;
                     }
                     break;
                 case 4:
-                    cout << "Thank you for using Home Care Scheduler" << endl
-                         << "Exiting" << endl
+                    writeFile(filePath, premium); // storing data in file before exiting
+                    cout << "Exiting" << endl
                          << "-----------------------" << endl;
                     break;
                 default:
@@ -435,17 +469,20 @@ int main()
             break;
 
         case 3:
-            cout << "Thank you for using Home Care Scheduler" << endl
-                 << "Exiting program" << endl
+            // admin view
+            cout << "Here are all the booking details:" << endl;
+            readFile(filePath);
+            break;
+
+        case 4:
+            cout << "Exiting program" << endl
                  << "-----------------------" << endl;
             break;
 
         default:
-            cout << "Invalid input. Enter a number between 1 to 3" << endl;
-
+            cout << "Invalid input. Enter a number between 1 to 4" << endl;
             break;
         }
-    } while (firstChoice != 3);
-
+    } while (firstChoice != 4);
     return 0;
 }
